@@ -1,0 +1,17 @@
+# Build directory
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Compiled files
+*.o
+*.exe
+{{PROJECT_NAME}}
+
+# OS files
+.DS_Store
+Thumbs.db

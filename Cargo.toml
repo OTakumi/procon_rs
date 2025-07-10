@@ -1,0 +1,18 @@
+[package]
+name = "procon_rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+fs_extra = "1.3"
+regex = "1.10"
+colored = "2.1"
+dirs = "5.0"
+
+[dev-dependencies]
+tempfile = "3.10"
