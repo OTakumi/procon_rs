@@ -104,6 +104,24 @@ mod error_tests {
         assert!(matches!(error, ProconError::Io(_)));
     }
 
+    /// Tests that TemplateNotFoundWithHint error includes helpful message about template creation.
+    ///
+    /// This ensures that users receive clear guidance on how to create missing templates,
+    /// including the exact path where the template should be placed.
+    #[test]
+    fn test_template_not_found_with_hint_error_display() {
+        // Arrange: Create a TemplateNotFoundWithHint error with a template name
+        let template_name = "custom";
+        let error = ProconError::TemplateNotFoundWithHint(template_name.to_string());
+
+        // Act: Convert the error to its string representation
+        let error_message = error.to_string();
+
+        // Assert: Verify the error message includes both template name and helpful hint
+        assert!(error_message.contains("Template 'custom' not found"));
+        assert!(error_message.contains("~/.config/procon_rs/templates/custom"));
+    }
+
     /// Tests that ProconError implements Send and Sync traits for thread safety.
     ///
     /// This is crucial for error handling in multi-threaded environments and

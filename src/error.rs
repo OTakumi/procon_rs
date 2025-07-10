@@ -11,6 +11,9 @@ pub enum ProconError {
     #[error("Template '{0}' not found")]
     TemplateNotFound(String),
     
+    #[error("Template '{0}' not found. Please create it in ~/.config/procon_rs/templates/{0}")]
+    TemplateNotFoundWithHint(String),
+    
     #[error("Failed to create project: {0}")]
     ProjectCreationFailed(String),
     

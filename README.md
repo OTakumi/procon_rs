@@ -66,3 +66,18 @@ cd abc300_a
 # - main.cpp (template code)
 # - CMakeLists.txt (build configuration)
 # - .gitignore
+```
+
+## Templates
+
+Templates can be placed in `~/.config/procon_rs/templates/`. Each template must include:
+
+- `main.cpp` - Main C++ source file
+- `CMakeLists.txt` - CMake build configuration
+
+Example custom template:
+
+```bash
+mkdir -p ~/.config/procon_rs/templates/my-template
+cd ~/.config/procon_rs/templates/my-template
+# Create main.cpp and CMakeLists.txt files

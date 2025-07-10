@@ -41,28 +41,36 @@ impl NewCommand {
     }
 
     fn load_template(template_name: &str, _config: &Config) -> Result<Template> {
-        // For built-in templates, load from the templates directory
-        if template_name == "default" {
-            // Try to find the template in the project root
-            let mut template_path = std::env::current_dir()?;
-            template_path.push("templates");
-            template_path.push(template_name);
-
-            // If not found in current dir, try cargo manifest dir
-            if !template_path.exists() {
-                if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
-                    template_path = PathBuf::from(manifest_dir);
-                    template_path.push("templates");
-                    template_path.push(template_name);
-                }
+        let loader = TemplateLoader::new();
+        
+        // Try to find user template first
+        match loader.find_template(template_name) {
+            Ok(template_path) => {
+                Template::load_from_path(&template_path)
             }
-
-            Template::load_from_path(&template_path)
-        } else {
-            let loader = TemplateLoader::new();
-            let _template_path = loader.find_template(template_name)?;
-            // For now, only support default template
-            Err(ProconError::TemplateNotFound(template_name.to_string()))
+            Err(_) => {
+                // Template not found in user directory, try builtin templates
+                
+                // Check if this is a builtin template
+                let builtin_templates = vec!["default", "advanced"];
+                if builtin_templates.contains(&template_name) {
+                    // Try cargo manifest dir for development
+                    if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+                        let dev_template_path = PathBuf::from(manifest_dir)
+                            .join("templates")
+                            .join(template_name);
+                        
+                        if dev_template_path.exists() {
+                            return Template::load_from_path(&dev_template_path);
+                        }
+                    }
+                    
+                    // If CARGO_MANIFEST_DIR doesn't work, suggest user to create the template
+                    return Err(ProconError::TemplateNotFoundWithHint(template_name.to_string()));
+                }
+                
+                Err(ProconError::TemplateNotFound(template_name.to_string()))
+            }
         }
     }
 

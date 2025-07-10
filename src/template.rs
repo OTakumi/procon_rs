@@ -8,24 +8,29 @@ pub struct Template {
     pub files: HashMap<String, String>,
 }
 
-pub struct TemplateLoader {
-    builtin_templates: Vec<String>,
-}
+pub struct TemplateLoader;
 
 impl TemplateLoader {
     pub fn new() -> Self {
-        Self {
-            builtin_templates: vec!["default".to_string(), "advanced".to_string()],
-        }
+        Self
     }
 
     pub fn find_template(&self, name: &str) -> Result<PathBuf> {
-        if self.builtin_templates.contains(&name.to_string()) {
-            // For now, return a fake path for builtin templates
-            Ok(PathBuf::from(format!("templates/{}", name)))
-        } else {
-            Err(ProconError::TemplateNotFound(name.to_string()))
+        // First, check user config directory
+        if let Some(config_dir) = dirs::config_dir() {
+            let user_template_path = config_dir
+                .join("procon_rs")
+                .join("templates")
+                .join(name);
+            
+            if user_template_path.exists() {
+                return Ok(user_template_path);
+            }
         }
+        
+        // For builtin templates, we need to return an error since they don't exist
+        // The caller should handle the fallback
+        Err(ProconError::TemplateNotFound(name.to_string()))
     }
 }
 
