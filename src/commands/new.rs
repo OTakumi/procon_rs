@@ -51,7 +51,12 @@ impl NewCommand {
             Err(_) => {
                 // Template not found in user directory, try builtin templates
                 
-                // Check if this is a builtin template
+                // First try to load from built-in embedded templates
+                if let Ok(builtin_template) = Template::from_builtin(template_name) {
+                    return Ok(builtin_template);
+                }
+                
+                // If not a built-in template, try development environment
                 let builtin_templates = vec!["default", "advanced"];
                 if builtin_templates.contains(&template_name) {
                     // Try cargo manifest dir for development
@@ -65,7 +70,7 @@ impl NewCommand {
                         }
                     }
                     
-                    // If CARGO_MANIFEST_DIR doesn't work, suggest user to create the template
+                    // If neither embedded nor development template works, suggest user template
                     return Err(ProconError::TemplateNotFoundWithHint(template_name.to_string()));
                 }
                 

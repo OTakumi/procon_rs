@@ -3,6 +3,10 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+// Embedded template content
+const DEFAULT_MAIN_CPP: &str = include_str!("../templates/default/main.cpp");
+const DEFAULT_CMAKE: &str = include_str!("../templates/default/CMakeLists.txt");
+
 #[derive(Debug, Clone)]
 pub struct Template {
     pub files: HashMap<String, String>,
@@ -35,6 +39,74 @@ impl TemplateLoader {
 }
 
 impl Template {
+    /// Creates a template from embedded content strings.
+    /// 
+    /// This method allows creating templates from compile-time embedded strings,
+    /// enabling built-in templates to be included in the binary without requiring
+    /// external template files. This ensures the application works out-of-the-box
+    /// even when user-specific template directories don't exist.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `_name` - The template name (currently unused but kept for future extensibility)
+    /// * `main_cpp_content` - Content for the main.cpp file
+    /// * `cmake_content` - Content for the CMakeLists.txt file
+    /// 
+    /// # Returns
+    /// 
+    /// * `Template` - A template instance with the embedded content
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use procon_rs::template::Template;
+    /// 
+    /// let main_cpp = "#include <iostream>\nint main() { return 0; }";
+    /// let cmake = "project({{PROJECT_NAME}})";
+    /// let template = Template::from_embedded_content("default", main_cpp, cmake);
+    /// ```
+    pub fn from_embedded_content(_name: &str, main_cpp_content: &str, cmake_content: &str) -> Self {
+        let mut files = HashMap::new();
+        files.insert("main.cpp".to_string(), main_cpp_content.to_string());
+        files.insert("CMakeLists.txt".to_string(), cmake_content.to_string());
+        
+        Self { files }
+    }
+
+    /// Creates a template from built-in embedded templates.
+    /// 
+    /// This method provides access to templates that are compiled into the binary,
+    /// ensuring the application can create projects even when external template
+    /// files are not available. Built-in templates serve as fallbacks when user
+    /// templates are not found.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `template_name` - The name of the built-in template to load
+    /// 
+    /// # Returns
+    /// 
+    /// * `Ok(Template)` - Successfully loaded built-in template
+    /// * `Err(ProconError)` - Template name is not a recognized built-in template
+    /// 
+    /// # Supported Templates
+    /// 
+    /// * `"default"` - Basic C++ competitive programming template
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use procon_rs::template::Template;
+    /// 
+    /// let template = Template::from_builtin("default").unwrap();
+    /// ```
+    pub fn from_builtin(template_name: &str) -> Result<Self> {
+        match template_name {
+            "default" => Ok(Self::from_embedded_content("default", DEFAULT_MAIN_CPP, DEFAULT_CMAKE)),
+            _ => Err(ProconError::TemplateNotFound(template_name.to_string()))
+        }
+    }
+
     /// Loads a template from the specified directory path with dynamic file detection.
     /// 
     /// This method implements a comprehensive template loading system that:
